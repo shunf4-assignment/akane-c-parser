@@ -1,0 +1,20 @@
+alphabet 1
+
+1 [whitespaces] 4
+[space] [tab] [vtab] [newline]
+
+states 2
+
+0 start 0
+	0 <epsilon>
+	1 <[whitespaces]>
+		<havewhitespace>
+	-1
+
+1 havewhitespace 1
+	0 <epsilon>
+	1 <[whitespaces]>
+		<havewhitespace>
+	-1
+
+0

@@ -1,0 +1,26 @@
+alphabet 2
+
+1 [digitswithoutzero] 9
+1 2 3 4 5 6 7 8 9
+
+0 0
+
+states 2
+
+0 start 0
+	0 <epsilon>
+	1 <0>
+		<validinteger>
+	1 <[digitswithoutzero]>
+		<validinteger>
+	-1
+
+1 validinteger 1
+	0 <epsilon>
+	1 <0>
+		<validinteger>
+	1 <[digitswithoutzero]>
+		<validinteger>
+	-1
+
+0

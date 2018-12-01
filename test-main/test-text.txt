@@ -1,0 +1,10 @@
+#define AB_CD
+  
+		  
+
+#de
+int main
+30000
+ 
+	
+	2.5e9
