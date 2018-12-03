@@ -21,18 +21,42 @@
     <ClInclude Include="utils.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="letters.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="automata-states.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="automatas.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="tokens.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="grammarsymbols.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lettertoken.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="letters.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="akane-lang-test.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="utils.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="automata.cpp">
+    <ClCompile Include="automatas.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="akane-lang.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="grammarsymbols.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

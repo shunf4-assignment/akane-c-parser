@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+#include "stdafx.h"
 #include "akane-lang.h"
 #include <memory>
 
@@ -16,6 +16,14 @@ namespace AkaneLang
 	template class AkaneLang::NFA<LetterString, SimpleState>;
 	template class AkaneLang::DFA<LetterString, SimpleState>;
 
+	template class AkaneLang::NFA<NamedGrammarSymbol, ItemState>;
+	template class AkaneLang::DFA<NamedGrammarSymbol, ItemState>;
+
+	template void AkaneLang::NFA<LetterString, SimpleState>::print<AkaneUtils::Logger>(AkaneUtils::Logger &out);
+	template void AkaneLang::NFA<AkaneLang::NamedGrammarSymbol, AkaneLang::ItemState>::print<AkaneUtils::Logger>(AkaneUtils::Logger &out);
+	template void AkaneLang::NFA<LetterString, SimpleState>::print<std::ostream>(std::ostream &out);
+	template void AkaneLang::NFA<AkaneLang::NamedGrammarSymbol, AkaneLang::ItemState>::print<std::ostream>(std::ostream &out);
+
 	template <class L, template <class LL> class AutomataState>
 	AkaneLang::NFA<L, AutomataState>::NFA(const std::vector<L>& _alphabet, const std::map<L, L> &_tagifyMap, LetterGenerator * _letterGenP) : alphabet(_alphabet), tagifyMap(_tagifyMap), letterGenP(_letterGenP)
 	{
@@ -26,6 +34,7 @@ namespace AkaneLang
 #pragma warning(pop)
 		name = tmpStr;
 		initialStateIndex = invalidStateIndex;
+		isNotMatchedLettersMappedToElse = false;
 	}
 
 	template <class L, template <class LL> class AutomataState>
@@ -38,6 +47,7 @@ namespace AkaneLang
 #pragma warning(pop)
 		name = tmpStr;
 		initialStateIndex = invalidStateIndex;
+		isNotMatchedLettersMappedToElse = false;
 	}
 
 	template <class L, template <class LL> class AutomataState>
@@ -121,8 +131,6 @@ namespace AkaneLang
 		return result;
 	}
 
-	template void AkaneLang::NFA<LetterString, SimpleState>::print<AkaneUtils::Logger>(AkaneUtils::Logger &out);
-
 	template <class L, template <class LL> class AutomataState>
 	template <class Out>
 	void AkaneLang::NFA<L, AutomataState>::print(Out &out)
@@ -130,10 +138,10 @@ namespace AkaneLang
 		using namespace std;
 		out << "==== FA 打印 ====" << endl;
 		out << "名称: " << name << " ("<< this->typeStr() << ")" << endl;
-		out << "字母表: " << endl;
+		out << "字母表: " << (isNotMatchedLettersMappedToElse ? " ([else] 启用)" : "") << endl;
 		for (auto &l : alphabet)
 		{
-			out << l.getDescription();
+			out << l.getLetterDescription();
 			bool first = true;
 			for (auto &p : tagifyMap)
 			{
@@ -145,7 +153,7 @@ namespace AkaneLang
 						out << " : ";
 					}
 					
-					out << p.first.getDescription() << " ";
+					out << p.first.getLetterDescription() << " ";
 				}
 			}
 			out << endl;
@@ -164,7 +172,7 @@ namespace AkaneLang
 			{
 				if (empty)
 					empty = false;
-				out << dPair.first.getDescription() << " -> ";
+				out << dPair.first.getLetterDescription() << " -> ";
 				if (dPair.second.size() > 0) {
 					for (auto &destStateIndex : dPair.second)
 					{
@@ -260,6 +268,7 @@ namespace AkaneLang
 	AkaneLang::DFA<L, AutomataState>::DFA(NFA<L, AutomataState>& nfa)
 	{
 		this->DFA<L, AutomataState>::DFA(nfa.alphabet, nfa.tagifyMap, nfa.letterGenP);
+		this->isNotMatchedLettersMappedToElse = nfa.isNotMatchedLettersMappedToElse;
 
 		lg("==== 开始将 NFA %s 转为 DFA %s ====", nfa.name.c_str(), NFA<L, AutomataState>::name.c_str());
 		std::vector< std::set< StateIndex>> statesInSetForm;
@@ -268,18 +277,19 @@ namespace AkaneLang
 		AutomataState< L> first;
 		std::set <StateIndex> tmpFirst = std::set< StateIndex>{ nfa.initialStateIndex };
 		lg("第一个状态: %d", nfa.initialStateIndex);
-		std::set <StateIndex> trueFirst = nfa.epsilonClosure(tmpFirst);
+		std::set <StateIndex> trueFirstIndices = nfa.epsilonClosure(tmpFirst);
 		lg("第一个状态闭包后: ");
-		for (auto si : trueFirst)
+		for (auto si : trueFirstIndices)
 		{
 			lg("%d", si);
 		}
 
-		first.description = nfa.makeDescription(trueFirst);
-		first.tag = nfa.haveAcceptedState(trueFirst) ? AutomataStateTag::accepted : nfa.haveIntermediateState(trueFirst) ? AutomataStateTag::intermediate : AutomataStateTag::notAccepted;
+		//first.description = nfa.makeDescription(trueFirstIndices);
+		nfa.merge(first, trueFirstIndices);
+		first.tag = nfa.haveAcceptedState(trueFirstIndices) ? AutomataStateTag::accepted : nfa.haveIntermediateState(trueFirstIndices) ? AutomataStateTag::intermediate : AutomataStateTag::notAccepted;
 
 		NFA<L, AutomataState>::states.push_back(first);
-		statesInSetForm.push_back(trueFirst);
+		statesInSetForm.push_back(trueFirstIndices);
 		
 		NFA<L, AutomataState>::initialStateIndex = 0;
 
@@ -291,34 +301,34 @@ namespace AkaneLang
 				// 生成目标状态集合
 				bool haveAccepted = false;
 				bool haveIntermediate = false;
-				std::set< StateIndex> destStates;
+				std::set< StateIndex> destStateIndices;
 
 				for (auto si : statesInSetForm[i])
 				{
 					if (nfa.states[si].delta.count(l) == 1)
 					{
-						destStates.insert(nfa.states[si].delta[l].begin(), nfa.states[si].delta[l].end());
+						destStateIndices.insert(nfa.states[si].delta[l].begin(), nfa.states[si].delta[l].end());
 					}
 				}
 
-				lg("状态 %d 通过 %s 可到达状态: ", i, l.getDescription().c_str());
+				lg("状态 %d 通过 %s 可到达状态: ", i, l.getLetterDescription().c_str());
 
-				for (auto si : destStates)
+				for (auto si : destStateIndices)
 				{
 					lg("%d", si);
 				}
 
-				destStates = nfa.epsilonClosure(destStates);
+				destStateIndices = nfa.epsilonClosure(destStateIndices);
 
-				lg("状态 %d 通过 %s 可到达状态 (ε闭包后): ", i, l.getDescription().c_str());
+				lg("状态 %d 通过 %s 可到达状态 (ε闭包后): ", i, l.getLetterDescription().c_str());
 
-				for (auto si : destStates)
+				for (auto si : destStateIndices)
 				{
 					lg("%d", si);
 				}
 
-				haveAccepted = nfa.haveAcceptedState(destStates);
-				haveIntermediate = nfa.haveIntermediateState(destStates);
+				haveAccepted = nfa.haveAcceptedState(destStateIndices);
+				haveIntermediate = nfa.haveIntermediateState(destStateIndices);
 
 				// 查重, 不重则插入新状态中
 				bool duplicate = false;
@@ -326,7 +336,7 @@ namespace AkaneLang
 				StateIndex duplicatedStateSetIndex = 0;
 				for (StateIndex j = 0; j < statesInSetFormSize; j++)
 				{
-					if (destStates == statesInSetForm[j])
+					if (destStateIndices == statesInSetForm[j])
 					{
 						duplicate = true;
 						duplicatedStateSetIndex = j;
@@ -338,11 +348,12 @@ namespace AkaneLang
 				if (!duplicate)
 				{
 					AutomataState< L> curr;
-					curr.description = nfa.makeDescription(destStates);
+					//curr.description = nfa.makeDescription(destStateIndices);
 					curr.tag = haveAccepted ? AutomataStateTag::accepted : haveIntermediate ? AutomataStateTag::intermediate : AutomataStateTag::notAccepted;
+					nfa.merge(curr, destStateIndices);
 
 					NFA<L, AutomataState>::states.push_back(curr);
-					statesInSetForm.push_back(destStates);
+					statesInSetForm.push_back(destStateIndices);
 
 					NFA<L, AutomataState>::states[i].delta[l] = std::set<StateIndex>{ StateIndex(NFA<L, AutomataState>::states.size() - 1) };
 					lg("创建了新状态 %d : %s, %s", NFA<L, AutomataState>::states.size() - 1, curr.description.c_str(), automataStateTagText[curr.tag]);
@@ -373,7 +384,7 @@ namespace AkaneLang
 		auto statesSize = NFA<L, AutomataState>::states.size();
 		for (StateIndex i = 0; i < statesSize; i++)
 		{
-			if (i == statesSize - 1)	// 默认陷阱状态, 没有转移函数项
+			if (statesSize && i == statesSize - 1)	// 默认陷阱状态, 没有转移函数项
 				break;
 
 			auto &s = NFA<L, AutomataState>::states[i];
@@ -382,14 +393,14 @@ namespace AkaneLang
 			{
 				if (s.delta.count(l) != 1)
 				{
-					throw AkaneLangException("状态 %s 在读 %s 时不转移", s.description.c_str(), l.getValue().c_str());
+					throw AkaneLangException("状态 %s 在读 %s 时不转移", s.description.c_str(), l.getLetterDescription().c_str());
 				}
 			}
 			for (auto &dPair : s.delta)
 			{
 				if (dPair.second.size() != 1)
 				{
-					throw AkaneLangException("状态 %s 的 %s 转移状态数不为 1, 为 %d", s.description.c_str(), dPair.first.getValue().c_str(), dPair.second.size());
+					throw AkaneLangException("状态 %s 的 %s 转移状态数不为 1, 为 %d", s.description.c_str(), dPair.first.getLetterDescription().c_str(), dPair.second.size());
 				}
 			}
 		}
@@ -417,9 +428,19 @@ namespace AkaneLang
 		}
 
 		if (NFA<L, AutomataState>::states[currStateIndex].delta.count(l) == 0)
-			currStateIndex = NFA<L, AutomataState>::states.size() - 1;	// 掉入陷阱
-		else
-			currStateIndex = *(NFA<L, AutomataState>::states[currStateIndex].delta[l].cbegin());
+		{
+			if (this->isNotMatchedLettersMappedToElse)
+			{
+				l = L::elseLetter();
+			}
+			else
+			{
+				currStateIndex = NFA<L, AutomataState>::states.size() - 1;	// 掉入陷阱
+				return;
+			}
+		}
+		
+		currStateIndex = *(NFA<L, AutomataState>::states[currStateIndex].delta[l].cbegin());
 	}
 
 	template <class L, template <class LL> class AutomataState>
@@ -439,9 +460,19 @@ namespace AkaneLang
 		}
 
 		if (NFA<L, AutomataState>::states[currStateIndex].delta.count(l) == 0)
-			currStateIndex = NFA<L, AutomataState>::states.size() - 1;	// 掉入陷阱
-		else
-			currStateIndex = *(NFA<L, AutomataState>::states[currStateIndex].delta[l].cbegin());
+		{
+			if (this->isNotMatchedLettersMappedToElse)
+			{
+				l = L::elseLetter();
+			}
+			else
+			{
+				currStateIndex = NFA<L, AutomataState>::states.size() - 1;	// 掉入陷阱
+				return;
+			}
+		}
+
+		currStateIndex = *(NFA<L, AutomataState>::states[currStateIndex].delta[l].cbegin());
 	}
 
 	template <class L, template <class LL> class AutomataState>
@@ -460,9 +491,18 @@ namespace AkaneLang
 		}
 
 		if (NFA<L, AutomataState>::states[currStateIndex].delta.count(l) == 0)
-			return AutomataStateTag::notAccepted;	// 掉入陷阱
-		else
-			return NFA<L, AutomataState>::states[*(NFA<L, AutomataState>::states[currStateIndex].delta[l].cbegin())].tag;
+		{
+			if (this->isNotMatchedLettersMappedToElse)
+			{
+				l = L::elseLetter();
+			}
+			else
+			{
+				return AutomataStateTag::notAccepted;
+			}
+		}
+
+		return NFA<L, AutomataState>::states[*(NFA<L, AutomataState>::states[currStateIndex].delta[l].cbegin())].tag;
 	}
 
 	template <class L, template <class LL> class AutomataState>

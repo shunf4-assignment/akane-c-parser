@@ -21,10 +21,10 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="akane-lex.h">
+    <ClInclude Include="akane-parse.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="token-getters.h">
+    <ClInclude Include="parse-tree.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -32,10 +32,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="akane-lex.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="token-getters.cpp">
+    <ClCompile Include="akane-parse.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

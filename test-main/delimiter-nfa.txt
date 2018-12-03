@@ -1,0 +1,18 @@
+alphabet 1
+
+1 [delimiter] 9
+" [ ] ( ) ' { } ;
+
+states 2
+
+0 start 0
+	0 <epsilon>
+	1 <[delimiter]>
+		<accepted>
+	-1
+
+1 accepted 1
+	0 <epsilon>
+	-1
+
+0

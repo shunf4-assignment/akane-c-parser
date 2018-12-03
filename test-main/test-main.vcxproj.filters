@@ -49,5 +49,20 @@
     <Text Include="float-nfa.txt">
       <Filter>资源文件</Filter>
     </Text>
+    <Text Include="operator-nfa.txt">
+      <Filter>资源文件</Filter>
+    </Text>
+    <Text Include="comment-nfa.txt">
+      <Filter>资源文件</Filter>
+    </Text>
+    <Text Include="delimiter-nfa.txt">
+      <Filter>资源文件</Filter>
+    </Text>
+    <Text Include="grammar-template.txt">
+      <Filter>资源文件</Filter>
+    </Text>
+    <Text Include="grammar.txt">
+      <Filter>资源文件</Filter>
+    </Text>
   </ItemGroup>
 </Project>

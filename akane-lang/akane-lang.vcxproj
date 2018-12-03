@@ -76,6 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -87,6 +88,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -100,6 +102,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -115,6 +118,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -124,11 +128,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="akane-lang.h" />
+    <ClInclude Include="automata-states.h" />
+    <ClInclude Include="automatas.h" />
+    <ClInclude Include="grammarsymbols.h" />
+    <ClInclude Include="letters.h" />
+    <ClInclude Include="lettertoken.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="tokens.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="akane-lang-test.cpp" />
-    <ClCompile Include="automata.cpp" />
+    <ClCompile Include="akane-lang.cpp" />
+    <ClCompile Include="automatas.cpp" />
+    <ClCompile Include="grammarsymbols.cpp" />
     <ClCompile Include="letters.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>

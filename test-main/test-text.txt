@@ -1,10 +1,20 @@
-#define AB_CD
-  
-		  
-
-#de
-int main
-30000
- 
-	
-	2.5e9
+//#define FSLEX
+int main()
+{
+	int a;
+	int b;
+	//calculate a + b
+	int c_result; 
+	int d;
+	a = 5;
+	b = 6;
+	c_result = a + b;
+	if (c_result== 1234)
+	{
+		if (b > 67)
+		{
+			d = error();
+		}
+	}
+	return 0;
+} // End

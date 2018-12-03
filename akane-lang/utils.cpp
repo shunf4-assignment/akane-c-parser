@@ -1,8 +1,12 @@
+#include "stdafx.h"
 #include "utils.h"
 #include <fstream>
 
 using namespace std;
 using namespace AkaneUtils;
+
+std::string AkaneUtils::globalLogFileName = "";
+std::string AkaneUtils::globalErrorFileName = "";
 
 std::string AkaneUtils::getTimeString(const char *format = "%m%d%H%M%S")
 {
@@ -18,73 +22,49 @@ std::string AkaneUtils::getTimeString(const char *format = "%m%d%H%M%S")
 
 Logger & AkaneUtils::Logger::getInstance()
 {
-	static std::string fileName = AKANEUTILS_LOGGER_FILENAME_PREFIX
-#ifndef AKANEUTILS_LOGGER_FILENAME_DISABLE_DATE
-		+ getTimeString()
-#endif
-		+ ".log"
-		;
-
-	static Logger theLogger(fileName.c_str());
+	static Logger theLogger(globalLogFileName.c_str(), globalErrorFileName.c_str());
 	return theLogger;
 }
 
-std::ofstream AkaneUtils::Logger::getLogFile(int mode)
+std::ofstream &AkaneUtils::Logger::getLogStream()
 {
-	ofstream file(logFileName, mode);
-	if (!file.is_open())
-	{
-		//throw AkaneSystemException("Error: Log file %s can't be open as write.", logFileName);
-		return ofstream();
-	}
-	return file;
+	active(writingLogStream);
+	return *openedLogStream;
 }
 
-std::FILE * AkaneUtils::Logger::getLogFile(const char * mode)
+std::FILE * AkaneUtils::Logger::getLogFILE()
 {
-	FILE *file = fopen(logFileName.c_str(), mode);
-	if (!file)
-	{
-		//throw AkaneSystemException("Error: Log file %s can't be open as write.", logFileName);
-	}
-	return file;
+	active(writingLogFILE);
+	return openedLogFILE;
 }
 
-std::ofstream AkaneUtils::Logger::getErrorFile(int mode)
+std::ofstream &AkaneUtils::Logger::getErrorStream()
 {
-	ofstream file(errorFileName, mode);
-	if (!file.is_open())
-	{
-		//throw AkaneSystemException("Error: Log file %s can't be open as write.", errorFileName);
-		return ofstream();
-	}
-	return file;
+	active(writingErrorStream);
+	return *openedErrorStream;
 }
 
-std::FILE * AkaneUtils::Logger::getErrorFile(const char * mode)
+std::FILE * AkaneUtils::Logger::getErrorFILE()
 {
-	FILE *file = fopen(errorFileName.c_str(), mode);
-	if (!file)
-	{
-		//throw AkaneSystemException("Error: Log file %s can't be open as write.", errorFileName);
-	}
-	return file;
+	active(writingErrorFILE);
+	return openedErrorFILE;
 }
 
-AkaneUtils::Logger::Logger(const char * fileName) : errorFileName(fileName), logFileName(fileName)
+AkaneUtils::Logger::Logger(const char * fileName) : errorFileName(fileName), logFileName(fileName) , openedLogFILE(nullptr), openedLogStream(nullptr), openedErrorFILE(nullptr), openedErrorStream(nullptr), nowState(-1)
 {
 }
 
-AkaneUtils::Logger::Logger(const char * logFileName, const char * errorFileName) : errorFileName(errorFileName), logFileName(logFileName)
+AkaneUtils::Logger::Logger(const char * logFileName, const char * errorFileName) : errorFileName(errorFileName), logFileName(logFileName), openedLogFILE(nullptr), openedLogStream(nullptr), openedErrorFILE(nullptr), openedErrorStream(nullptr), nowState(-1)
 {
 }
 
 void AkaneUtils::Logger::log(const char * msg_format, ...)
 {
+#ifdef AKANEUTILS_DO_LOG
 	va_list args;
 	int result;
 
-	FILE *file = getLogFile("a");
+	FILE *file = getLogFILE();
 	if (!file)
 		return;
 	va_start(args, msg_format);
@@ -94,27 +74,108 @@ void AkaneUtils::Logger::log(const char * msg_format, ...)
 	{
 		throw AkaneSystemException("Error: Writing %s to %s failed.", msg_format, logFileName);
 	}
-	fclose(file);
+	fflush(file);
+#endif
 }
 
 void AkaneUtils::Logger::error(const char * msg_format, ...)
 {
+#ifdef AKANEUTILS_DO_LOG
 	va_list args;
 	int result;
 
-	FILE *logFile = getLogFile("a");
-	FILE *errorFile = getErrorFile("a");
-
 	va_start(args, msg_format);
-	result = error_insideVa(this->logFileName == this->errorFileName ? nullptr : logFile, errorFile, msg_format, args);
-	va_end(args);
+	if (this->logFileName == this->errorFileName)
+	{
+		FILE *errorFile = getErrorFILE();
+		result = error_insideVa(nullptr, errorFile, msg_format, args);
+		va_end(args);
+		fflush(errorFile);
+	}
+	else
+	{
+		FILE *logFile = getLogFILE();
+		FILE *errorFile = getErrorFILE();
+		result = error_insideVa(logFile, errorFile, msg_format, args);
+		va_end(args);
+		fflush(logFile);
+		fflush(errorFile);
+	}
 	if (result < 0)
 	{
 		throw AkaneSystemException("Error: Writing %s to %s, %s failed.", msg_format, logFileName, errorFileName);
 	}
+#endif
+}
 
-	logFile && fclose(logFile);
-	errorFile && fclose(errorFile);
+void AkaneUtils::Logger::active(int destState)
+{
+	if (nowState == destState)
+		return;
+
+	if (nowState == -1)
+		closeAll();
+	else if (logFileName == errorFileName && (nowState & 0b10) != (destState & 0b10))
+	{
+		if (nowState & 0b10)
+		{
+			closeError();
+		}
+		else
+		{
+			closeLog();
+		}
+	}
+
+	switch (destState)
+	{
+	case writingLogStream:
+		if (!openedLogStream)
+			openedLogStream = new ofstream(logFileName, ios::app);
+		break;
+	case writingErrorStream:
+		if (!openedErrorStream)
+			openedErrorStream = new ofstream(errorFileName, ios::app);
+		break;
+	case writingLogFILE:
+		if (!openedLogFILE)
+			openedLogFILE = fopen(logFileName.c_str(), "a");
+		break;
+	case writingErrorFILE:
+		if (!openedErrorFILE)
+			openedErrorFILE = fopen(errorFileName.c_str(), "a");
+		break;
+	}
+
+	nowState = destState;
+}
+
+void AkaneUtils::Logger::closeLog()
+{
+	if (openedLogFILE)
+	{
+		fclose(openedLogFILE);
+		openedLogFILE = nullptr;
+	}
+	if (openedErrorFILE)
+	{
+		fclose(openedErrorFILE);
+		openedErrorFILE = nullptr;
+	}
+}
+void AkaneUtils::Logger::closeError(){
+	if (openedLogStream && openedLogStream->is_open())
+	{
+		openedLogStream->close();
+		delete openedLogStream;
+		openedLogStream = nullptr;
+	}
+	if (openedErrorStream && openedErrorStream->is_open())
+	{
+		openedErrorStream->close();
+		delete openedErrorStream;
+		openedErrorStream = nullptr;
+	}
 }
 
 int AkaneUtils::Logger::log_insideVa(FILE *file, const char * msg_format, va_list args)
@@ -162,16 +223,9 @@ int AkaneUtils::Logger::error_insideVa(FILE *logFile, FILE *errorFile, const cha
 
 }
 
-Logger & Logger::operator<<(decltype(std::endl<char, std::char_traits<char>>)& e)
+AkaneUtils::Logger::~Logger()
 {
-	std::ofstream f(getLogFile(std::ios::app));
-	if (f.is_open())
-		f << e;
-	if (printLogToStdout)
-	{
-		cout << e;
-	}
-	return *this;
+	closeAll();
 }
 
 AkaneException::AkaneException(const char *msg_format, ...)

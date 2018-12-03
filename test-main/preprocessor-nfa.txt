@@ -20,7 +20,7 @@ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
 
 
 
-states 4
+states 6
 
 0 start 0
 	0 <epsilon>
@@ -31,27 +31,54 @@ states 4
 1 afterhash 0
 	0 <epsilon>
 	1 <[lowerletters]>
-		<startinst>
+		<startdirect>
 	1 <[upperletters]>
-		<startinst>
+		<startdirect>
 	-1
 
-2 startinst 1
+2 startdirect 1
 	1 <epsilon>
-        <startinst>
+        <startdirect>
 	1 <[lowerletters]>
-		<startinst>
+		<startdirect>
 	1 <[upperletters]>
-		<startinst>
+		<startdirect>
 	1 <[whitespaces]>
-		<startinst>
+		<meetfirstspaces>
 	1 <[allowedSym]>
-		<startinst>
+		<startdirect>
 	1 <[newline]>
-		<endinst>
+		<enddirect>
 	-1
 
-3 endinst 1
+3 meetfirstspaces 2
+	0 <epsilon>
+	1 <[lowerletters]>
+		<continuedirect>
+	1 <[upperletters]>
+		<continuedirect>
+	1 <[whitespaces]>
+		<meetfirstspaces>
+	1 <[allowedSym]>
+		<continuedirect>
+	0 <[newline]>
+	-1
+
+4 continuedirect 1
+	0 <epsilon>
+	1 <[lowerletters]>
+		<continuedirect>
+	1 <[upperletters]>
+		<continuedirect>
+	1 <[whitespaces]>
+		<continuedirect>
+	1 <[allowedSym]>
+		<continuedirect>
+	1 <[newline]>
+		<enddirect>
+	-1
+
+5 enddirect 1
 	0 <epsilon>
 	-1
 

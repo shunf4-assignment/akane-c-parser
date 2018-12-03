@@ -1,0 +1,186 @@
+alphabet 17
+
+0 = 0 : 0 + 0 - 0 . 0 < 0 > 0 ! 0 * 0 & 0 ^ 0 | 0 ? 0 / 0 % 0 , 0 ~
+
+states 25
+
+0 start 0
+	0 <epsilon>
+	1 <=>
+		<validop_eq>
+	1 <:>
+		<validternaryop_colon>
+	1 <+>
+		<validop_pl>
+	1 <->
+		<validop_mn>
+	1 <.>
+		<validop_dot>
+	1 <<>
+		<validop_l>
+	1 <>>
+		<validop_g>
+	1 <!>
+		<validop_exclm>
+	1 <*>
+		<validop_star>
+	1 <&>
+		<validop_and>
+	1 <^>
+		<validop_xor>
+	1 <|>
+		<validop_or>
+	1 <?>
+		<validternaryop_quest>
+	1 </>
+		<validop_div>
+	1 <%>
+		<validop_mod>
+	1 <,>
+		<validop_comma>
+	1 <~>
+		<validop_not>
+	-1
+
+
+1 validop_eq 1
+	0 <epsilon>
+	1 <=>
+		<validop_eqeq>
+	-1
+
+2 validop_eqeq 1
+	0 <epsilon>
+	-1
+
+3 validternaryop_colon 1
+	0 <epsilon>
+	1 <:>
+		<validop_dom>
+	-1
+
+4 validop_dom 1
+	0 <epsilon>
+	-1
+
+5 validop_pl 1
+	0 <epsilon>
+	1 <=>
+		<validop>
+	1 <+>
+		<validop>
+	-1
+
+6 validop_mn 1
+	0 <epsilon>
+	1 <=>
+		<validop>
+	1 <->
+		<validop>
+	-1
+
+7 validop_dot 1
+	0 <epsilon>
+	-1
+
+8 validop_l 1
+	0 <epsilon>
+	1 <<>
+		<validop_ll>
+	-1
+
+9 validop_ll 1
+	0 <epsilon>
+	1 <=>
+		<validop>
+	-1
+
+10 validop_g 1
+	0 <epsilon>
+	1 <>>
+		<validop_gg>
+	-1
+
+11 validop_gg 1
+	0 <epsilon>
+	1 <=>
+		<validop>
+	-1
+
+12 validop_exclm 1
+	0 <epsilon>
+	1 <=>
+		<validop>
+	-1
+
+13 validop_star 1
+	0 <epsilon>
+	1 <=>
+		<validop>
+	-1
+
+14 validop_and 1
+	0 <epsilon>
+	1 <=>
+		<validop>
+	1 <&>
+		<validop_andand>
+	-1
+
+15 validop_andand 1
+	0 <epsilon>
+	1 <=>
+		<validop>
+	-1
+
+16 validop_or 1
+	0 <epsilon>
+	1 <=>
+		<validop>
+	1 <|>
+		<validop_oror>
+	-1
+
+17 validop_oror 1
+	0 <epsilon>
+	1 <=>
+		<validop>
+	-1
+
+18 validternaryop_quest 1
+	0 <epsilon>
+	-1
+
+19 validop_div 1
+	0 <epsilon>
+	1 <=>
+		<validop>
+	-1
+
+20 validop_mod 1
+	0 <epsilon>
+	1 <=>
+		<validop>
+	-1
+
+21 validop_comma 1
+	0 <epsilon>
+	-1
+
+22 validop_not 1
+	0 <epsilon>
+	1 <=>
+		<validop>
+	-1
+
+23 validop 1
+	0 <epsilon>
+	-1
+
+24 validop_xor 1
+	0 <epsilon>
+	1 <=>
+		<validop>
+	-1
+
+0

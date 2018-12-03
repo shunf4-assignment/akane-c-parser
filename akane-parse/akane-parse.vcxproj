@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{AFF6E108-4129-45D4-B709-D98B794D3502}</ProjectGuid>
+    <ProjectGuid>{40228626-7705-4D9F-BCBA-DFFBFC5AB7C3}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>akanelex</RootNamespace>
+    <RootNamespace>akaneparse</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -147,25 +147,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="akane-lex.h" />
+    <ClInclude Include="akane-parse.h" />
+    <ClInclude Include="parse-tree.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="token-getters.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="akane-lex.cpp" />
+    <ClCompile Include="akane-parse.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="token-getters.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\akane-lang\akane-lang.vcxproj">
-      <Project>{f22d6e25-4da8-459c-a7be-1dfa238ad4d0}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

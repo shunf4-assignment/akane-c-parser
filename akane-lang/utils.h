@@ -1,5 +1,4 @@
 #pragma once
-#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -9,9 +8,7 @@
 #include <exception>
 #include <cstdarg>
 
-#ifndef AKANEUTILS_LOGGER_FILENAME_PREFIX
-#define AKANEUTILS_LOGGER_FILENAME_PREFIX "logs/akane-log-"
-#endif
+#define AKANEUTILS_DO_LOG
 
 #ifndef AKANEUTILS_DO_NOT_DEFINE_LG
 #define logger AkaneUtils::Logger::getInstance()
@@ -45,7 +42,15 @@ DEFINE_AKANE_EXCEPTION(System)
 
 namespace AkaneUtils
 {
+	extern std::string globalLogFileName;
+	extern std::string globalErrorFileName;
+
 	std::string getTimeString(const char *format);
+
+	int constexpr writingLogStream = 0;
+	int constexpr writingLogFILE = 1;
+	int constexpr writingErrorStream = 2;
+	int constexpr writingErrorFILE = 3;
 
     class Logger
     {
@@ -55,23 +60,90 @@ namespace AkaneUtils
 		bool printLogToStdout = false;
 		bool printErrorToStderr = true;
 
+		int nowState;
+
+		FILE *openedLogFILE;
+		std::ofstream *openedLogStream;
+		FILE *openedErrorFILE;
+		std::ofstream *openedErrorStream;
+
 		std::string logFileName;
 		std::string errorFileName;
-        std::ofstream getLogFile(int mode);
-        std::FILE *getLogFile(const char *mode);
+        std::ofstream &getLogStream();
+        std::FILE *getLogFILE();
 
-		std::ofstream getErrorFile(int mode);
-		std::FILE *getErrorFile(const char *mode);
+		std::ofstream &getErrorStream();
+		std::FILE *getErrorFILE();
 
 		Logger(const char *fileName);
 		Logger(const char *logFileName, const char *errorFileName);
         void log(const char *msg_format, ...);
         void error(const char *msg_format, ...);
+		void active(int destState);
+		void closeAll() { closeLog(); closeError(); }
+		void closeLog();
+		void closeError();
+
 
 		template <class T>
-		Logger &operator<<(const T&e);
+		Logger &operator<<(const T&e)
+		{
+#ifdef AKANEUTILS_DO_LOG
+			std::ofstream &f = (getLogStream());
+			if (f.is_open())
+				f << e << std::flush;
+			if (printLogToStdout)
+			{
+				std::cout << e << std::flush;
+			}
+#endif
+			return *this;
+		}
 
-		Logger &operator<<(decltype(std::endl<char, std::char_traits<char>>) &e);
+		Logger &operator<<(decltype(std::endl<char, std::char_traits<char>>) &e)
+		{
+#ifdef AKANEUTILS_DO_LOG
+			std::ofstream &f = getLogStream();
+			if (f.is_open())
+				f << e << std::flush;
+			if (printLogToStdout)
+			{
+				std::cout << e << std::flush;
+			}
+#endif
+			return *this;
+		}
+
+		template <class T>
+		Logger &operator<(const T&e)
+		{
+#ifdef AKANEUTILS_DO_LOG
+			std::ofstream &f = (getErrorStream());
+			if (f.is_open())
+				f << e << std::flush;
+			if (printErrorToStderr)
+			{
+				std::cerr << e << std::flush;
+			}
+			return *this;
+#endif
+		}
+
+		Logger &operator<(decltype(std::endl<char, std::char_traits<char>>) &e)
+		{
+#ifdef AKANEUTILS_DO_LOG
+			std::ofstream &f = getErrorStream();
+			if (f.is_open())
+				f << e << std::flush;
+			if (printErrorToStderr)
+			{
+				std::cerr << e << std::flush;
+			}
+			return *this;
+#endif
+		}
+
+		~Logger();
         //void error(const char *msg_format, va_list args);
 	private:
 		int log_insideVa(FILE *file, const char * msg_format, va_list args);
@@ -79,17 +151,5 @@ namespace AkaneUtils
 		
     };
 
-	template<class T>
-	Logger & Logger::operator<<(const T & e)
-	{
-		std::ofstream f(getLogFile(std::ios::app));
-		if (f.is_open())
-			f << e;
-		if (printLogToStdout)
-		{
-			std::cout << e;
-		}
-		return *this;
-	}
 }
 
