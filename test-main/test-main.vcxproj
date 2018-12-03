@@ -181,6 +181,7 @@
     <Text Include="grammar.txt" />
     <Text Include="integer-nfa.txt" />
     <Text Include="keywordAndIdentifier-nfa.txt" />
+    <Text Include="lexer-template.txt" />
     <Text Include="operator-nfa.txt" />
     <Text Include="preprocessor-nfa.txt" />
     <Text Include="test-nfa-template.txt" />

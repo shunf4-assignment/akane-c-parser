@@ -33,13 +33,13 @@
     <ClInclude Include="tokens.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="grammarsymbols.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="lettertoken.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="grammar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="letter-token.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

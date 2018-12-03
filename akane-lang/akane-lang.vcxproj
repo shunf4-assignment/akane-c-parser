@@ -130,9 +130,9 @@
     <ClInclude Include="akane-lang.h" />
     <ClInclude Include="automata-states.h" />
     <ClInclude Include="automatas.h" />
-    <ClInclude Include="grammarsymbols.h" />
+    <ClInclude Include="grammar.h" />
     <ClInclude Include="letters.h" />
-    <ClInclude Include="lettertoken.h" />
+    <ClInclude Include="letter-token.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="tokens.h" />
     <ClInclude Include="utils.h" />
