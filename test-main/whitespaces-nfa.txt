@@ -1,7 +1,9 @@
+¿Õ°×·ûºÅ´® NFA
+
 alphabet 1
 
-1 [whitespaces] 4
-[space] [tab] [vtab] [newline]
+	1 [whitespaces] 4
+	[space] [tab] [vtab] [newline]
 
 states 2
 

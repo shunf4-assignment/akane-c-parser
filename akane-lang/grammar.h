@@ -1,71 +1,58 @@
 
 namespace AkaneLang
 {
-	struct LetterToken;
+	typedef size_t SymbolIndex;
+	constexpr SymbolIndex epsilonIndex = (std::numeric_limits<SymbolIndex>::max)();
+
+	class Grammar;
 
 	struct GrammarSymbol : public virtual Letter
 	{
-		virtual std::string getUniqueName() const = 0;
-		virtual std::string getSymbolDescription() const = 0;
-		//virtual void setName(const std::string &_name) = 0;
-		virtual bool operator<(const Letter &l) const { return getUniqueName() < dynamic_cast<const GrammarSymbol &>(l).getUniqueName(); }
-		virtual bool operator>(const Letter &l) const { return getUniqueName() > dynamic_cast<const GrammarSymbol &>(l).getUniqueName(); }
-		virtual bool operator<=(const Letter &l) const { return getUniqueName() <= dynamic_cast<const GrammarSymbol &>(l).getUniqueName(); }
-		virtual bool operator>=(const Letter &l) const { return getUniqueName() >= dynamic_cast<const GrammarSymbol &>(l).getUniqueName(); }
-		virtual bool operator==(const Letter &l) const { return getUniqueName() == dynamic_cast<const GrammarSymbol &>(l).getUniqueName(); }
-		virtual bool operator!=(const Letter &l) const { return getUniqueName() != dynamic_cast<const GrammarSymbol &>(l).getUniqueName(); }
-
 		virtual bool isTerminal() const = 0;
+		virtual ~GrammarSymbol();
 
-		virtual GrammarSymbol *duplicate_freeNeeded() const = 0;
-
-		virtual ~GrammarSymbol() {};
+		virtual GrammarSymbol *duplicate_freeNeeded() const override = 0;
 	};
 
-	struct NamedGrammarSymbol : public virtual GrammarSymbol
+	/* 本来这样就是完全合法的: struct StringifiedGrammarSymbol : public virtual GrammarSymbol, public StringifiedLetter
+		但由于 MSVC++ 2010 以上的一个 bug : https://stackoverflow.com/questions/3592648/c-weird-diamond-inheritance-issue
+		 https://connect.microsoft.com/VisualStudio/feedback/details/590625/visual-c-incorrectly-reports-ambiguity-when-covariance-is-used-with-virtual-inheritance
+		需要写成这样
+	*/
+	struct StringifiedGrammarSymbol : public virtual Letter, public virtual GrammarSymbol, public StringifiedLetter
 	{
-		std::string symbolName;
+		static const StringifiedGrammarSymbol &epsilon();
+		StringifiedGrammarSymbol();
+		StringifiedGrammarSymbol(const StringifiedGrammarSymbol &s2);
+		StringifiedGrammarSymbol(const std::string &_name);
+		StringifiedGrammarSymbol(const TokenizedLetter &lt);
 
-		static const NamedGrammarSymbol &epsilon() { static NamedGrammarSymbol epsilon("");  return epsilon; }
-		static const NamedGrammarSymbol &elseLetter() { static NamedGrammarSymbol elseSym("\1");  return elseSym; }
-		NamedGrammarSymbol() : symbolName("(invalid)") {}
-		NamedGrammarSymbol(const NamedGrammarSymbol &s2) : symbolName(s2.symbolName) {}
-		NamedGrammarSymbol(const std::string &_symbolName) : symbolName(_symbolName) {}
-		virtual std::string getUniqueName() const override { return symbolName; }
-		virtual std::string getSymbolDescription() const { return AkaneLang::escape(getUniqueName()); }
-		virtual std::string getLetterDescription() const { return AkaneLang::escape(getUniqueName()); }
-		virtual std::string getLongDescription() const { return std::string("[ ") + AkaneLang::escape(getUniqueName()) + std::string(" ]"); }
-		//virtual void setName(const std::string &_name) override { terminalName = _name; }
-		virtual bool isTerminal() const { throw AkaneRuntimeException("你不应该调用 isTerminal()"); }
-		virtual GrammarSymbol *duplicate_freeNeeded() const { throw AkaneRuntimeException("你不应该调用 duplicate_freeNeeded()"); }
+		virtual bool isTerminal() const;
+		virtual StringifiedGrammarSymbol *duplicate_freeNeeded() const override
+		{
+			return new StringifiedGrammarSymbol(*this);
+		}
 
-		NamedGrammarSymbol(const LetterToken &lt);
-
-		virtual ~NamedGrammarSymbol() {};
+		virtual ~StringifiedGrammarSymbol();
 	};
 
 	struct Terminal : public virtual GrammarSymbol
 	{
-		virtual bool isTerminal() const
-		{
-			return true;
-		}
-		virtual ~Terminal() {}
+		virtual bool isTerminal() const;
+
+		virtual ~Terminal();
 	};
 
-	struct SimpleTerminal : public NamedGrammarSymbol, public Terminal
+	struct StringifiedTerminal : public StringifiedGrammarSymbol, public Terminal
 	{
-		virtual bool isTerminal() const
-		{
-			return Terminal::isTerminal();
-		}
+		virtual bool isTerminal() const;
 
-		static const SimpleTerminal &epsilon() { static SimpleTerminal epsilonTerminal("");  return epsilonTerminal; }
-		static const SimpleTerminal &eof() { static SimpleTerminal eofTerminal(zero);  return eofTerminal; }
-		SimpleTerminal(const SimpleTerminal &st2) : NamedGrammarSymbol(st2) {}
-		SimpleTerminal(const std::string &_terminalName) : NamedGrammarSymbol(_terminalName) {}
+		static const StringifiedTerminal &epsilon();
+		static const StringifiedTerminal &eof();
+		StringifiedTerminal(const StringifiedTerminal &st2);
+		StringifiedTerminal(const std::string &_terminalName); 
 
-		virtual SimpleTerminal *duplicate_freeNeeded() const override { return new SimpleTerminal(*this); }
+		virtual StringifiedTerminal *duplicate_freeNeeded() const override;
 	};
 
 	struct NonTerminal : public virtual GrammarSymbol
@@ -77,24 +64,18 @@ namespace AkaneLang
 		virtual ~NonTerminal() {}
 	};
 
-	struct SimpleNonTerminal : public NamedGrammarSymbol, public NonTerminal
+	struct StringifiedNonTerminal : public StringifiedGrammarSymbol, public NonTerminal
 	{
-		virtual bool isTerminal() const
-		{
-			return NonTerminal::isTerminal();
-		}
+		virtual bool isTerminal() const override;
 
-		SimpleNonTerminal(const SimpleNonTerminal &snt2) : NamedGrammarSymbol(snt2) {}
-		SimpleNonTerminal(const std::string &_nonTerminalName) : NamedGrammarSymbol(_nonTerminalName) {}
+		static const StringifiedNonTerminal &epsilon() { static StringifiedNonTerminal epsilonTerminal("");  return epsilonTerminal; }
+		static const StringifiedNonTerminal &eof() { static StringifiedNonTerminal eofTerminal(eofString);  return eofTerminal; }
 
-		virtual SimpleNonTerminal *duplicate_freeNeeded() const override { return new SimpleNonTerminal(*this); }
+		StringifiedNonTerminal(const StringifiedNonTerminal &snt2);
+		StringifiedNonTerminal(const std::string &_nonTerminalName);
+
+		virtual StringifiedNonTerminal *duplicate_freeNeeded() const override;
 	};
-
-
-	typedef size_t SymbolIndex;
-	constexpr SymbolIndex epsilonIndex = (std::numeric_limits<SymbolIndex>::max)();
-
-	class Grammar;
 
 	// 产生式
 	class Production
@@ -107,11 +88,10 @@ namespace AkaneLang
 		std::vector<SymbolIndex> leftIndices;
 		std::vector<SymbolIndex> rightIndices;
 
-		std::string getDescription();
+		std::string getDescription() const;
 
-		//private:
-		Production(Grammar *_grammarP, std::vector<SymbolIndex> _leftIndices, std::vector<SymbolIndex> _rightIndices, Index _indexInGrammar) : grammarP(_grammarP), leftIndices(_leftIndices), rightIndices(_rightIndices), indexInGrammar(_indexInGrammar)
-		{}
+	private:
+		Production(Grammar *_grammarP, std::vector<SymbolIndex> _leftIndices, std::vector<SymbolIndex> _rightIndices, Index _indexInGrammar);
 	};
 
 	// LR(1) 项目
@@ -123,18 +103,15 @@ namespace AkaneLang
 		size_t dotPosition;
 		SymbolIndex lookAheadIndex;
 
-		std::string getDescription();
+		std::string getDescription() const;
 		
-		bool isReducing()
-		{
-			return dotPosition == productionP->rightIndices.size();
-		}
+		bool isReducing() const;
 
-		LRItem(Production &_production, size_t _dotPosition, SymbolIndex _lookAheadIndex) : productionP(&_production), dotPosition(_dotPosition), lookAheadIndex(_lookAheadIndex) {}
+		LRItem(Production &_production, size_t _dotPosition, SymbolIndex _lookAheadIndex);
 
-		LRItem(const LRItem &lr2) : productionP(lr2.productionP), dotPosition(lr2.dotPosition), lookAheadIndex(lr2.lookAheadIndex) {}
+		LRItem(const LRItem &lr2);
 
-		bool operator==(const LRItem &lri);
+		bool operator==(const LRItem &lri) const;
 
 		LRItem &operator=(const LRItem &lri);
 		
@@ -156,277 +133,24 @@ namespace AkaneLang
 	private:
 		std::vector<std::set<SymbolIndex>> FIRST;
 	public:
-		Grammar()
-		{
-			char tmpBuf[40] = { 0 };
-			sprintf(tmpBuf, "文法 %x", static_cast<unsigned>(reinterpret_cast<unsigned long long>(this)));
-			name = tmpBuf;
-		}
+		Grammar(std::istream &is);
 
-		void setStartSymbol(const NonTerminal &nt)
-		{
-			auto symFindIt = std::find_if(symbols.begin(), symbols.end(), [&nt](GrammarSymbol *symP) -> bool {return *symP == nt; const Letter &a = nt; });
+		void setStartSymbol(const NonTerminal &nt);
 
-			if (symFindIt == symbols.end())
-			{
-				throw AkaneInputValueException("输入的 %s 没有与之匹配的文法符号.", nt.getSymbolDescription().c_str());
-			}
+		void addEOFSymbol();
 
-			startSymbolIndex = std::distance(symbols.begin(), symFindIt);
-		}
+		void addSymbol(const GrammarSymbol &_symbol);
 
-		void addEOFSymbol()
-		{
-			eofSymbolIndex = symbols.size();
-			symbols.push_back(SimpleTerminal::eof().duplicate_freeNeeded());
-		}
+		void addProduction(std::vector<std::string> _left, std::vector<std::string> _right);
 
-		void addSymbol(const GrammarSymbol &_symbol)
-		{
-			symbols.push_back(_symbol.duplicate_freeNeeded());
-		}
-
-		void addProduction(std::vector<std::string> _left, std::vector<std::string> _right)
-		{
-			// Left
-			std::vector<SymbolIndex> leftIndices;
-
-			for (auto &symStr : _left)
-			{
-				auto symFindIt = std::find_if(symbols.begin(), symbols.end(), [&symStr](GrammarSymbol *symP) -> bool {return symP->getSymbolDescription() == symStr; });
-				if (symFindIt == symbols.end())
-				{
-					throw AkaneInputValueException("输入的 %s 没有与之匹配的文法符号.", symStr.c_str());
-				}
-
-				leftIndices.push_back(std::distance(symbols.begin(), symFindIt));
-			}
-
-			// Right
-			std::vector<SymbolIndex> rightIndices;
-
-			for (auto &symStr : _right)
-			{
-				auto symFindIt = std::find_if(symbols.begin(), symbols.end(), [&symStr](GrammarSymbol *symP) -> bool {return symP->getSymbolDescription() == symStr; });
-				if (symFindIt == symbols.end())
-				{
-					throw AkaneInputValueException("输入的 %s 没有与之匹配的文法符号.", symStr.c_str());
-				}
-
-				rightIndices.push_back(std::distance(symbols.begin(), symFindIt));
-			}
-
-			productions.push_back(Production(this, leftIndices, rightIndices, productions.size()));
-		}
-
-		void generateFIRST()
-		{
-			FIRST.clear();
-			bool somethingChanged = true;
-			while (somethingChanged)
-			{
-				somethingChanged = false;
-				for (SymbolIndex symI = 0; symI < symbols.size(); symI++)
-				{
-					auto &sym = *(symbols[symI]);
-					if (FIRST.size() == symI)
-						FIRST.push_back(std::set<SymbolIndex>{});
-					auto &thisFIRST = FIRST[symI];
-					size_t prevSize = thisFIRST.size();
-
-					if (sym.isTerminal())
-					{
-						thisFIRST.insert(symI);
-					}
-					else
-					{
-						for (auto &prod : productions)
-						{
-							if (prod.leftIndices.size() == 1 && prod.leftIndices[0] == symI)
-							{
-								// X->...
-								// 这两个分支应该可以用某种巧妙的方式重写, 组合起来
-								if (prod.rightIndices.size() == 0)
-								{
-									// X-><epsilon>
-									thisFIRST.insert(epsilonIndex);
-								}
-								else
-								{
-									SymbolIndex firstSymIndex = prod.rightIndices[0];
-									auto &firstSym = *(symbols[firstSymIndex]);
-									if (firstSym.isTerminal())
-									{
-										// X->a...
-										thisFIRST.insert(firstSymIndex);
-									}
-									else
-									{
-										// X->Y...
-										
-										// 得到 FIRST(Y) - {<epsilon>}
-										auto tmpSet = FIRST.size() <= firstSymIndex ? std::set<SymbolIndex>{} : FIRST[firstSymIndex];
-										auto findEpsilonIt = tmpSet.find(epsilonIndex);
-										bool haveEpsilon;
-										if (haveEpsilon = (findEpsilonIt != tmpSet.end()))
-										{
-											tmpSet.erase(findEpsilonIt);
-										}
-										thisFIRST.insert(tmpSet.begin(), tmpSet.end());
-
-										// 若 FIRST(Y) 含 <epsilon> 要将后续的 FIRST 加入
-										if (haveEpsilon)
-										{
-											auto rightSymIIt = prod.rightIndices.begin() + 1;
-											for (; rightSymIIt != prod.rightIndices.end(); rightSymIIt++)
-											{
-												SymbolIndex rightSymI = *rightSymIIt;
-												if (symbols[rightSymI]->isTerminal())
-												{
-													thisFIRST.insert(firstSymIndex);
-													// Y[rightSymIIt] 是终结符, 应该跳出循环
-													break;
-												}
-
-												tmpSet = FIRST[firstSymIndex];
-												findEpsilonIt = tmpSet.find(epsilonIndex);
-												if (haveEpsilon = (findEpsilonIt != tmpSet.end()))
-												{
-													tmpSet.erase(findEpsilonIt);
-												}
-												thisFIRST.insert(tmpSet.begin(), tmpSet.end());
-												if (haveEpsilon)
-												{
-													// Y[rightSymIIt] 没有 <epsilon>, 应该跳出循环
-													break;
-												}
-											}
-
-											if (rightSymIIt == prod.rightIndices.end())
-											{
-												// 没有跳出循环, 一路都遇到 <epsilon>
-												thisFIRST.insert(epsilonIndex);
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-					if (thisFIRST.size() != prevSize)
-						somethingChanged = true;
-				}
-			}
-
-			return;
-		}
-
-		/*
-		std::set<SymbolIndex> getFIRST(SymbolIndex _letterIndex)
-		{
-			if (FIRST.size() == 0)
-				generateFIRST();
-
-			if (_letterIndex == epsilonIndex)
-			return result;
-		}*/
+		void generateFIRST();
 
 		// 获取一序列文法符号的 FIRST
-		std::set<SymbolIndex> getFIRST(std::vector<SymbolIndex> _letterIndices)
-		{
-			if (FIRST.size() == 0)
-				generateFIRST();
-
-			std::set<SymbolIndex> result;
-			auto symIIt = _letterIndices.begin();
-			for (; symIIt != _letterIndices.end(); symIIt++)
-			{
-				SymbolIndex symI = *symIIt;
-				std::set<SymbolIndex> tmpSet(FIRST[symI]);
-				auto findEpsilonIt = tmpSet.find(epsilonIndex);
-				bool haveEpsilon;
-				if (haveEpsilon = (findEpsilonIt != tmpSet.end()))
-				{
-					// have epsilon
-					tmpSet.erase(findEpsilonIt);
-				}
-				result.insert(tmpSet.begin(), tmpSet.end());
-
-				if (!haveEpsilon)
-				{
-					break;
-				}
-			}
-
-			if (symIIt == _letterIndices.end())
-			{
-				result.insert(epsilonIndex);
-			}
-
-			return result;
-		}
+		std::set<SymbolIndex> getFIRST(std::vector<SymbolIndex> _letterIndices);
 
 		template <class Out>
-		void print(Out &out)
-		{
-			out << "==== 打印文法 " << name << " ====" << std::endl;
-			out << std::endl;
-			out << "符号表: " << std::endl;
-			out << std::endl;
-			out << "终结符: ";
-			for (auto symP : symbols)
-			{
-				if (symP->isTerminal() && *symP != SimpleTerminal::eof())
-				{
-					out << symP->getSymbolDescription() << " ";
-				}
-			}
-			out << std::endl;
-			out << "非终结符: ";
-			for (auto symP : symbols)
-			{
-				if (!(symP->isTerminal()))
-				{
-					out << symP->getSymbolDescription() << " ";
-				}
-			}
-			out << std::endl;
-			out << std::endl;
+		void print(Out &out);
 
-			out << "起始符号: " << symbols[startSymbolIndex]->getSymbolDescription() << std::endl << std::endl;
-
-			out << "生成式:" << std::endl << std::endl;
-
-			for (auto &p : productions)
-			{
-				out << p.getDescription() << std::endl;
-			}
-
-			if (FIRST.size())
-			{
-				out << std::endl;
-				out << "FIRST 集合: " << std::endl;
-				for (SymbolIndex symI = 0; symI < symbols.size(); symI++)
-				{
-					out << "FIRST(" << symbols[symI]->getSymbolDescription() << ") = { ";
-					for (auto symI2 : FIRST[symI])
-					{
-						if (symI2 == epsilonIndex)
-							out << "ε " << ", ";
-						else
-							out << symbols[symI2]->getSymbolDescription() << ", ";
-					}
-					out << "}" << std::endl;
-				}
-			}
-		}
-
-		~Grammar()
-		{
-			for (auto symP : symbols)
-			{
-				delete symP;
-			}
-		}
+		~Grammar();
 	};
 }

@@ -1,3 +1,5 @@
+ธกตใสý NFA
+
 alphabet 5
 
 1 [digitswithoutzero] 9

@@ -27,6 +27,12 @@
     <ClInclude Include="token-getters.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="c-style-lex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="internal-usings.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -35,7 +41,7 @@
     <ClCompile Include="akane-lex.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="token-getters.cpp">
+    <ClCompile Include="c-style-lex.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

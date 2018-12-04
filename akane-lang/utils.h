@@ -39,6 +39,7 @@ private:\
 };
 
 DEFINE_AKANE_EXCEPTION(System)
+DEFINE_AKANE_EXCEPTION(NotImplemented)
 
 namespace AkaneUtils
 {
@@ -52,9 +53,9 @@ namespace AkaneUtils
 	int constexpr writingErrorStream = 2;
 	int constexpr writingErrorFILE = 3;
 
-    class Logger
-    {
-    public:
+	class Logger
+	{
+	public:
 		static Logger &getInstance();
 
 		bool printLogToStdout = false;
@@ -69,16 +70,16 @@ namespace AkaneUtils
 
 		std::string logFileName;
 		std::string errorFileName;
-        std::ofstream &getLogStream();
-        std::FILE *getLogFILE();
+		std::ofstream &getLogStream();
+		std::FILE *getLogFILE();
 
 		std::ofstream &getErrorStream();
 		std::FILE *getErrorFILE();
 
 		Logger(const char *fileName);
 		Logger(const char *logFileName, const char *errorFileName);
-        void log(const char *msg_format, ...);
-        void error(const char *msg_format, ...);
+		void log(const char *msg_format, ...);
+		void error(const char *msg_format, ...);
 		void active(int destState);
 		void closeAll() { closeLog(); closeError(); }
 		void closeLog();
@@ -144,12 +145,12 @@ namespace AkaneUtils
 		}
 
 		~Logger();
-        //void error(const char *msg_format, va_list args);
+		//void error(const char *msg_format, va_list args);
 	private:
 		int log_insideVa(FILE *file, const char * msg_format, va_list args);
 		int error_insideVa(FILE *logFile, FILE *errorFile, const char * msg_format, va_list args);
-		
-    };
+
+	};
 
 }
 

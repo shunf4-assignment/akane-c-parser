@@ -1,22 +1,24 @@
+‘§¥¶¿Ì∆˜÷∏¡Ó NFA
+
 alphabet 7
-1 [lowerletters] 26
-a b c d e f g h i j k l m n o p q r s t u v w x y z
+	1 [lowerletters] 26
+	a b c d e f g h i j k l m n o p q r s t u v w x y z
 
-1 [upperletters] 26
-A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+	1 [upperletters] 26
+	A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
 
-1 [digits] 10
-0 1 2 3 4 5 6 7 8 9
+	1 [digits] 10
+	0 1 2 3 4 5 6 7 8 9
 
-1 [whitespaces] 3
-[space] [tab] [vtab]
+	1 [whitespaces] 3
+	[space] [tab] [vtab]
 
-1 [allowedSym] 23
-~ ! @ $ % ^ & * ( ) _ + = [ ] \ ; ' " : , . /
+	1 [allowedSym] 23
+	~ ! @ $ % ^ & * ( ) _ + = [ ] \ ; ' " : , . /
 
-0 #
+	0 #
 
-0 [newline]
+	0 [newline]
 
 
 

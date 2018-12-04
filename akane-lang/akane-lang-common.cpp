@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "akane-lang.h"
 using namespace AkaneLang;
+using namespace std;
 
-std::string AkaneLang::unescape(const std::string & orig)
+string AkaneLang::unescape(const string & orig)
 {
 	if (orig == "[space]")
 	{
@@ -23,12 +24,12 @@ std::string AkaneLang::unescape(const std::string & orig)
 	return orig;
 }
 
-LetterString AkaneLang::unescape(const LetterString & l)
+StringifiedLetter AkaneLang::unescape(const StringifiedLetter & l)
 {
-	return LetterString(unescape(l.text));
+	return StringifiedLetter(unescape(l.name));
 }
 
-std::string AkaneLang::escape(const std::string & orig)
+string AkaneLang::escape(const string & orig)
 {
 	if (orig == " ")
 	{
@@ -50,7 +51,7 @@ std::string AkaneLang::escape(const std::string & orig)
 	{
 		return ("[epsilon]");
 	}
-	if (orig == zero)
+	if (orig == eofString)
 	{
 		return ("[EOF]");
 	}

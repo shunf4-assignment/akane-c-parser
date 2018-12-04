@@ -30,16 +30,13 @@
     <ClInclude Include="automatas.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="tokens.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="grammar.h">
+    <ClInclude Include="tokenized-letter.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="letter-token.h">
+    <ClInclude Include="grammar.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -53,10 +50,16 @@
     <ClCompile Include="automatas.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="akane-lang.cpp">
+    <ClCompile Include="grammar.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="grammarsymbols.cpp">
+    <ClCompile Include="automata-states.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="akane-lang-common.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="tokenized-letter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -2,66 +2,56 @@
 
 namespace AkaneLang
 {
-
-
-	template <class L, template <class LL> class AutomataState>
-	class NFA
+	template <class AutomataState>
+	struct NFA
 	{
-	public:
-		static_assert(std::is_base_of_v<Letter, L>, "必须继承自 Letter");
-		std::vector< L> alphabet;
-		std::vector< AutomataState<L>> states;
-		LetterGenerator *letterGenP;
-		std::map<L, L> tagifyMap;
+		static_assert(std::is_base_of_v<BaseState, AutomataState>, "必须继承自 BaseState");
+
+		std::vector<StringifiedLetter> alphabet;
+		std::vector<AutomataState> states;
+		LetterGenerator *letterGeneratorP;
+		std::map<StringifiedLetter, StringifiedLetter> tagifyMap;
 		bool isNotMatchedLettersMappedToElse;
 		std::string name;
+		StateIndex initialStateIndex;
 
-		NFA(const std::vector< L> &_alphabet, const std::map<L, L> &_tagifyMap, LetterGenerator *_letterGenP);
 		NFA();
+		NFA(const std::vector<StringifiedLetter> &_alphabet, const std::vector<AutomataState> &_states, const std::map<StringifiedLetter, StringifiedLetter> &_tagifyMap, LetterGenerator *_letterGeneratorP, const std::string &_name, StateIndex _initialStateIndex);
 		virtual std::string typeStr() const;
-		void addState(AutomataState< L> state);
-		void loadAlphabet(const std::vector< L>& _alphabet);
-		void loadtagifyMap(const std::map<L, L> &_tagifyMap);
-		void loadStates(const std::vector< AutomataState< L>> &_states);
-		void loadDeltas(std::vector< std::map< L, std::set<StateIndex>>> &_indexedDeltas);
-		std::string makeDescription(std::set< StateIndex> &_stateSet);
-		bool haveAcceptedState(std::set< StateIndex> &_stateSet);
-		bool haveIntermediateState(std::set<StateIndex>& _stateSet);
-		void setInitialStateIndex(size_t _initialStateIndex) { initialStateIndex = _initialStateIndex; }
-		size_t getInitialStateIndex() { return initialStateIndex; }
-		std::set<StateIndex> epsilonClosure(const std::set<StateIndex> &ss);
-		template <class Out> void print(Out &out);
-		virtual void validate();
-		size_t initialStateIndex;
-
-		void merge(AutomataState<L> &dest, std::set<StateIndex> &srcIndices)
-		{
-			dest.startMerge();
-			for (auto si : srcIndices)
-			{
-				dest.mergeThisState(states[si]);
-			}
-			dest.endMerge();
-		}
+		/*
+		void addState(AutomataState _state);
+		void loadAlphabet(const std::vector<StringifiedLetter>& _alphabet);
+		void loadtagifyMap(const std::map<StringifiedLetter, StringifiedLetter> &_tagifyMap);
+		void loadStates(const std::vector<AutomataState> &_states);
+		void loadDeltas(std::vector< std::map<StringifiedLetter, std::set<StateIndex>>> &_indexedDeltas);
+		*/
+		bool haveAcceptedStateIn(const std::set<StateIndex> &_stateSet) const;
+		bool haveIntermediateStateIn(const std::set<StateIndex>& _stateSet) const;
+		std::set<StateIndex> getEpsilonClosureOf(const std::set<StateIndex> &_stateSet) const;
+		virtual void validate() const;
+		void mergeByStateIndices(AutomataState &dest, const std::set<StateIndex> &srcIndices) const;
+		template <class Out> void print(Out &out) const;
 	};
 
+	// DFA.
 	// DFA 的 states 最后一个 state 是自动创建的陷阱 state, 用来在接收到无法识别的字母时跳转
-	template <class L, template <class LL> class AutomataState>
-	class DFA : public NFA<L, AutomataState>
+	template <class AutomataState>
+	struct DFA : public NFA<AutomataState>
 	{
-	public:
-		DFA(const std::vector< L> &_alphabet, const std::map<L, L> &_tagifyMap, LetterGenerator *_letterGenP);
-		DFA(NFA<L, AutomataState> &nfa);
-		virtual void validate();
-		void oneStep();
-		void oneStep_peek();
-		AutomataStateTag peekStateTag();
-		void reset();
-		virtual std::string typeStr() const;
-		void setCurrStateIndex(size_t _currStateIndex) { currStateIndex = _currStateIndex; }
-		size_t getCurrStateIndex() { return currStateIndex; }
-		AutomataStateTag nowStateTag();
-	private:
 		size_t currStateIndex;
+		
+		DFA();
+		//DFA(const std::vector<StringifiedLetter> &_alphabet, const std::map<StringifiedLetter, StringifiedLetter> &_tagifyMap, LetterGenerator *_letterGeneratorP);
+		// 根据 NFA 构造本 DFA.
+		DFA(NFA<AutomataState> &nfa);
+		// 验证本 DFA 正确性.
+		virtual void validate() const override;
+		// 运行一步 DFA.
+		void goOneStep();
+		void goOneStep_peek();
+		AutomataStateTag nowStateTag() const;
+		AutomataStateTag peekStateTag() const;
+		void reset();
+		std::string typeStr() const override;
 	};
 }

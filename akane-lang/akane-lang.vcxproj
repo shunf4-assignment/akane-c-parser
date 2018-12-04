@@ -132,16 +132,17 @@
     <ClInclude Include="automatas.h" />
     <ClInclude Include="grammar.h" />
     <ClInclude Include="letters.h" />
-    <ClInclude Include="letter-token.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="tokens.h" />
+    <ClInclude Include="tokenized-letter.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="akane-lang.cpp" />
+    <ClCompile Include="akane-lang-common.cpp" />
+    <ClCompile Include="automata-states.cpp" />
     <ClCompile Include="automatas.cpp" />
-    <ClCompile Include="grammarsymbols.cpp" />
+    <ClCompile Include="grammar.cpp" />
     <ClCompile Include="letters.cpp" />
+    <ClCompile Include="tokenized-letter.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -31,9 +31,6 @@
     <Text Include="preprocessor-nfa.txt">
       <Filter>资源文件</Filter>
     </Text>
-    <Text Include="test-nfa-template.txt">
-      <Filter>资源文件</Filter>
-    </Text>
     <Text Include="test-text.txt">
       <Filter>资源文件</Filter>
     </Text>
@@ -65,6 +62,9 @@
       <Filter>资源文件</Filter>
     </Text>
     <Text Include="lexer-template.txt">
+      <Filter>资源文件</Filter>
+    </Text>
+    <Text Include="nfa-template.txt">
       <Filter>资源文件</Filter>
     </Text>
   </ItemGroup>

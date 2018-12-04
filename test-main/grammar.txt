@@ -1,9 +1,11 @@
+类 C 文法
+
 ->
 
-28
+terminal 28
 标识符 ( ) int void { } = return if else while ; [ ] < <= > >= == != * / 整数 浮点数 , + -
 
-22
+non-terminal 22
 程序 类型 语句块 内部声明 语句串 变量声明 语句 if句 while句 return句 赋值语句 表达式 relop 加法式 项 因子 FTYPE call 实参列表 tmp1 tmp2 实参
 
 程序 -> 类型 标识符 ( ) 语句块

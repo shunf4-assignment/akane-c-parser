@@ -1,7 +1,9 @@
+½ç·û NFA
+
 alphabet 1
 
-1 [delimiter] 9
-" [ ] ( ) ' { } ;
+	1 [delimiter] 9
+	" [ ] ( ) ' { } ;
 
 states 2
 

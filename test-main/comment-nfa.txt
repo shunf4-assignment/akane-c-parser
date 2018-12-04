@@ -1,14 +1,16 @@
+×¢ÊÍ NFA
+
 alphabet 4
 
-0 /
+	0 /
 
-0 *
+	0 *
 
-0 [newline]
+	0 [newline]
 
-2 [else]
+	2 [else]
 
-states 7
+	states 7
 
 0 start 0
 	0 <epsilon>

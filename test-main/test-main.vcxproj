@@ -184,7 +184,7 @@
     <Text Include="lexer-template.txt" />
     <Text Include="operator-nfa.txt" />
     <Text Include="preprocessor-nfa.txt" />
-    <Text Include="test-nfa-template.txt" />
+    <Text Include="nfa-template.txt" />
     <Text Include="test-text.txt" />
     <Text Include="whitespaces-nfa.txt" />
   </ItemGroup>

@@ -2,207 +2,123 @@
 #include "akane-lang.h"
 using namespace AkaneLang;
 
-AkaneLang::LetterString::LetterString(const std::string &_letter) : text(_letter)
+AkaneLang::StringifiedLetter::StringifiedLetter()
+	: Letter(), name("(invalid)")
 {
 }
 
-const LetterString & AkaneLang::LetterString::epsilon()
+AkaneLang::StringifiedLetter::StringifiedLetter(const StringifiedLetter & _l)
+	: Letter(_l), name(_l.name)
 {
-	static LetterString e("");
+}
+
+AkaneLang::StringifiedLetter::StringifiedLetter(const std::string &_name) : name(_name)
+{
+}
+
+AkaneLang::StringifiedLetter::StringifiedLetter(const TokenizedLetter & lt) : name(lt.getUniqueName())
+{
+	if (lt == TokenizedLetter::epsilon())
+		name = StringifiedLetter::epsilon().name;
+
+	if (lt == TokenizedLetter::eof())
+		name = StringifiedLetter::eof().name;
+
+	if (lt == TokenizedLetter::elseLetter())
+		name = StringifiedLetter::elseLetter().name;
+}
+
+StringifiedLetter & AkaneLang::StringifiedLetter::operator=(const StringifiedLetter & right)
+{
+	name = right.name;
+	return *this;
+}
+
+const StringifiedLetter & AkaneLang::StringifiedLetter::epsilon()
+{
+	static StringifiedLetter e("");
 	return e;
 }
 
-const LetterString & AkaneLang::LetterString::elseLetter()
+const StringifiedLetter & AkaneLang::StringifiedLetter::elseLetter()
 {
-	static LetterString e("[else]");
+	static StringifiedLetter e("[else]");
 	return e;
 }
 
-bool AkaneLang::LetterString::operator<(const Letter & r) const
+const StringifiedLetter & AkaneLang::StringifiedLetter::eof()
 {
-	return text < dynamic_cast<const LetterString &>(r).text;
+	static StringifiedLetter e(eofString);
+	return e;
 }
 
-bool AkaneLang::LetterString::operator>(const Letter & r)const
+std::string AkaneLang::StringifiedLetter::getUniqueName() const
 {
-	return text > dynamic_cast<const LetterString &>(r).text;
+	return name;
 }
 
-bool AkaneLang::LetterString::operator==(const Letter & r) const
+std::string AkaneLang::StringifiedLetter::getShortDescription() const
 {
-	return text == dynamic_cast<const LetterString &>(r).text;
+	return escape(name);
 }
 
-bool AkaneLang::LetterString::operator<=(const Letter & r) const
+std::string AkaneLang::StringifiedLetter::getLongDescription() const
 {
-	return text <= dynamic_cast<const LetterString &>(r).text;
+	return escape(name);
 }
 
-bool AkaneLang::LetterString::operator>=(const Letter & r) const
+StringifiedLetter * AkaneLang::StringifiedLetter::duplicate_freeNeeded() const
 {
-	return text >= dynamic_cast<const LetterString &>(r).text;
+	return new StringifiedLetter(*this);
 }
 
-bool AkaneLang::LetterString::operator!=(const Letter & r) const
+
+// 记得自己释放
+const StringifiedLetter *AkaneLang::StreamedLetterGenerator::next_freeNeeded()
 {
-	return text != dynamic_cast<const LetterString &>(r).text;
+	char c;
+	c = streamP->get();
+	if (!streamP->good() || c == EOF)
+	{
+		throw AkaneGetEOFException("无法再读入");
+	}
+	currLexemeStream << c;
+	std::string str(1, c);
+
+	auto p = new StringifiedLetter(str);
+	return p;
 }
 
 // 记得自己释放
-const LetterString &AkaneLang::LetterStringGenerator::next_freeNeeded()
+const StringifiedLetter *AkaneLang::StreamedLetterGenerator::peek_freeNeeded()
 {
 	char c;
-	c = s.get();
-	if (!s.good() || c == EOF)
-	{
-		throw AkaneGetEOFException("无法再读入");
-	}
-	currWordStream << c;
-	std::string str(1, c);
-
-	auto p = new LetterString(str);
-	return *p;
-}
-
-// 记得自己释放
-const LetterString &AkaneLang::LetterStringGenerator::peek_freeNeeded()
-{
-	char c;
-	c = s.peek();
-	if (!s.good() || c == EOF)
+	c = streamP->peek();
+	if (!streamP->good() || c == EOF)
 	{
 		throw AkaneGetEOFException("无法再读入");
 	}
 	std::string str(1, c);
 
-	auto p = new LetterString(str);
-	return *p;
+	auto p = new StringifiedLetter(str);
+	return p;
 }
 
-AkaneLang::LetterStringGenerator::LetterStringGenerator(std::istream & _s) : s(_s), currWordStream()
+void AkaneLang::StreamedLetterGenerator::ignoreOne()
 {
-	lastPos = s.tellg();
-}
-
-
-AkaneLang::LetterToken::LetterToken(const AkaneLang::Token &t)
-{
-	token = t;
-}
-
-const LetterToken & AkaneLang::LetterToken::epsilon()
-{
-	static AkaneLang::Token t;
-	static LetterToken e(t);
-	return e;
-}
-
-const LetterToken & AkaneLang::LetterToken::elseLetter()
-{
-	static AkaneLang::Token t(TokenType::TElse, 0);
-	static LetterToken e(t);
-	return e;
-}
-
-const LetterToken & AkaneLang::LetterToken::eof()
-{
-	static AkaneLang::Token t(TokenType::TEOF, 0);
-	static LetterToken e(t);
-	return e;
-}
-
-bool AkaneLang::LetterToken::operator<(const Letter & r) const
-{
-	try {
-		return token.getStrictType() < dynamic_cast<const LetterToken &>(r).token.getStrictType();
-	}
-	catch (std::bad_cast)
-	{
-		return AkaneLang::GrammarSymbol::operator<(r);
-	}
-}
-
-bool AkaneLang::LetterToken::operator>(const Letter & r) const
-{
-	try {
-		return token.getStrictType() > dynamic_cast<const LetterToken &>(r).token.getStrictType();
-	}
-	catch (std::bad_cast)
-	{
-		return AkaneLang::GrammarSymbol::operator>(r);
-	}
-}
-
-bool AkaneLang::LetterToken::operator==(const Letter & r) const
-{
-	try {
-		return token.getStrictType() == dynamic_cast<const LetterToken &>(r).token.getStrictType();
-	}
-	catch (std::bad_cast)
-	{
-		return AkaneLang::GrammarSymbol::operator==(r);
-	}
-}
-
-bool AkaneLang::LetterToken::operator<=(const Letter & r) const
-{
-	try {
-		return token.getStrictType() <= dynamic_cast<const LetterToken &>(r).token.getStrictType();
-	}
-	catch (std::bad_cast)
-	{
-		return AkaneLang::GrammarSymbol::operator<=(r);
-	}
-}
-
-bool AkaneLang::LetterToken::operator>=(const Letter & r) const
-{
-	try {
-		return token.getStrictType() >= dynamic_cast<const LetterToken &>(r).token.getStrictType();
-	}
-	catch (std::bad_cast)
-	{
-		return AkaneLang::GrammarSymbol::operator>=(r);
-	}
-}
-
-bool AkaneLang::LetterToken::operator!=(const Letter & r) const
-{
-	try {
-		return token.getStrictType() != dynamic_cast<const LetterToken &>(r).token.getStrictType();
-	}
-	catch (std::bad_cast)
-	{
-		return AkaneLang::GrammarSymbol::operator!=(r);
-	}
-}
-
-// 记得释放
-#pragma warning(push)
-#pragma warning(disable:4172)
-const LetterToken & AkaneLang::LetterTokenGenerator::next_freeNeeded()
-{
-	if (p == v.cend())
+	char c;
+	c = streamP->get();
+	if (!streamP->good() || c == EOF)
 	{
 		throw AkaneGetEOFException("无法再读入");
 	}
-
-	auto q = new LetterToken(*p++);
-	return *q;
+	currLexemeStream << c;
 }
-#pragma warning(pop)
 
-#pragma warning(push)
-#pragma warning(disable:4172)
-const LetterToken & AkaneLang::LetterTokenGenerator::peek_freeNeeded()
+AkaneLang::StreamedLetterGenerator::StreamedLetterGenerator(std::istream & _s) : streamP(&_s), currLexemeStream(), lastPos(streamP->tellg())
 {
-	if (p == v.cend())
-	{
-		//throw AkaneGetEOFException("无法再读入");
-		auto q = new LetterToken(LetterToken::eof());
-		return *q;
-	}
-	auto q = new LetterToken(*p);
-	return *q;
 }
-#pragma warning(pop)
+
+AkaneLang::Letter::~Letter()
+{
+}

@@ -1,7 +1,5 @@
 #pragma once
 
-DEFINE_AKANE_EXCEPTION(Runtime)
-
 namespace AkaneLang
 {
 	/*
@@ -28,7 +26,6 @@ namespace AkaneLang
 		virtual std::string getLongDescription() const = 0;
 		virtual std::string getUniqueName() const = 0;
 		virtual Letter *duplicate_freeNeeded() const = 0;
-		virtual std::unique_ptr<Letter> duplicate() const = 0;
 
 		virtual ~Letter() = 0;
 	};
@@ -45,34 +42,31 @@ namespace AkaneLang
 			duplicate/duplicate_freeNeeded : 返回一个指向本 Letter 对象副本的指针.
 
 	*/
+	struct TokenizedLetter;
 	struct StringifiedLetter : public virtual Letter
 	{
 		std::string name;
-		StringifiedLetter() : Letter()
-		{
-			name = "(invalid)";
-		}
-		StringifiedLetter(const StringifiedLetter &_l) : Letter(_l)
-		{
-			name = _l.name;
-		}
+		StringifiedLetter();
+		StringifiedLetter(const StringifiedLetter &_l);
 		StringifiedLetter(const std::string &_name);
+		StringifiedLetter(const TokenizedLetter &lt);
+		
+		StringifiedLetter &operator=(const StringifiedLetter &right);
 
 		static const StringifiedLetter &epsilon();
 		static const StringifiedLetter &elseLetter();
+		static const StringifiedLetter & eof();
 
-		virtual std::string getUniqueName() const override { return name; }
-		virtual std::string getShortDescription() const { return escape(name); }
-		virtual std::string getLongDescription() const { return escape(name); }
-		virtual StringifiedLetter *duplicate_freeNeeded() const { return new StringifiedLetter(*this); }
+		virtual std::string getUniqueName() const override;
+		virtual std::string getShortDescription() const;
+		virtual std::string getLongDescription() const;
+		virtual StringifiedLetter *duplicate_freeNeeded() const;
 
 		virtual ~StringifiedLetter() {};
 	};
 
 	struct LetterGenerator
 	{
-		virtual std::unique_ptr<Letter> next() = 0;
-		virtual std::unique_ptr<Letter> peek() = 0;
 		virtual const Letter *next_freeNeeded() = 0;
 		virtual const Letter *peek_freeNeeded() = 0;
 		virtual void ignoreOne() = 0;
@@ -82,30 +76,31 @@ namespace AkaneLang
 	{
 		std::istream *streamP;
 		std::streampos lastPos;
-		std::stringstream *currTokenStreamP;
-		virtual std::unique_ptr<NamedLetter> next();
-		virtual std::unique_ptr<NamedLetter> peek();
-		virtual const NamedLetter &next_freeNeeded();
-		virtual const NamedLetter &peek_freeNeeded();
+		std::stringstream currLexemeStream;
+		virtual const StringifiedLetter *next_freeNeeded();
+		virtual const StringifiedLetter *peek_freeNeeded();
+		virtual void ignoreOne();
+
 		template <typename T>
-		void dumpCurrWord(T &dest);
-		LetterStringGenerator(std::istream &_s);
+		void dumpCurrLexeme(T &dest);
+
+		StreamedLetterGenerator(std::istream &_s);
 	};
 
 	template<typename T>
-	inline void LetterStringGenerator::dumpCurrWord(T & dest)
+	inline void StreamedLetterGenerator::dumpCurrLexeme(T & dest)
 	{
-		currWordStream.seekg(0, std::ios::beg);
-		currWordStream >> dest;
-		lastPos = s.tellg();
+		currLexemeStream.seekg(0, std::ios::beg);
+		currLexemeStream >> dest;
+		lastPos = streamP->tellg();
 	}
 
 	template<>
-	inline void LetterStringGenerator::dumpCurrWord(std::string & dest)
+	inline void StreamedLetterGenerator::dumpCurrLexeme(std::string & dest)
 	{
-		currWordStream.seekg(0, std::ios::beg);
-		dest = currWordStream.str();
-		currWordStream.str("");
-		lastPos = s.tellg();
+		currLexemeStream.seekg(0, std::ios::beg);
+		dest = currLexemeStream.str();
+		currLexemeStream.str("");
+		lastPos = streamP->tellg();
 	}
 }
