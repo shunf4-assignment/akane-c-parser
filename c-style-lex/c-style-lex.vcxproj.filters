@@ -21,10 +21,13 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="akane-lex.h">
+    <ClInclude Include="..\akane-lex\akane-lex.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="internal-usings.h">
+    <ClInclude Include="..\akane-lex\internal-usings.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="c-style-lex.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -32,7 +35,10 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="akane-lex.cpp">
+    <ClCompile Include="dllmain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="c-style-lex.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

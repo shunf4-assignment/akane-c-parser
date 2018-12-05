@@ -34,13 +34,17 @@ namespace AkaneLang
 	{
 		std::vector<TokenizedLetter> &tokLetters;
 		Index i;
+		bool isVectorInternal;
 
 		virtual const TokenizedLetter *next_freeNeeded();
 		virtual const TokenizedLetter *peek_freeNeeded();
 		virtual void ignoreOne();
 
+		TokenizedLetterGenerator();
 		TokenizedLetterGenerator(const TokenizedLetterGenerator &_another);
+		TokenizedLetterGenerator& operator=(const TokenizedLetterGenerator &_another);
 
 		TokenizedLetterGenerator(std::vector<TokenizedLetter> &_tokLetters);
+		~TokenizedLetterGenerator();
 	};
 }

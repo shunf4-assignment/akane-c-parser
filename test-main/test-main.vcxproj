@@ -172,6 +172,9 @@
     <ProjectReference Include="..\akane-parse\akane-parse.vcxproj">
       <Project>{40228626-7705-4d9f-bcba-dffbfc5ab7c3}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\c-style-lex\c-style-lex.vcxproj">
+      <Project>{1be5b1f3-8927-4b91-8b30-6ff8e85552df}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Text Include="comment-nfa.txt" />

@@ -64,7 +64,7 @@ std::string AkaneLang::StringifiedLetter::getShortDescription() const
 
 std::string AkaneLang::StringifiedLetter::getLongDescription() const
 {
-	return escape(name);
+	return std::string("[ ") + escape(name) + " ]";
 }
 
 StringifiedLetter * AkaneLang::StringifiedLetter::duplicate_freeNeeded() const

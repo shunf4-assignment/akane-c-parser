@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "akane-lex", "akane-lex\akan
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "akane-parse", "akane-parse\akane-parse.vcxproj", "{40228626-7705-4D9F-BCBA-DFFBFC5AB7C3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "c-style-lex", "c-style-lex\c-style-lex.vcxproj", "{1BE5B1F3-8927-4B91-8B30-6FF8E85552DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -51,6 +53,14 @@ Global
 		{40228626-7705-4D9F-BCBA-DFFBFC5AB7C3}.Release|x64.Build.0 = Release|x64
 		{40228626-7705-4D9F-BCBA-DFFBFC5AB7C3}.Release|x86.ActiveCfg = Release|Win32
 		{40228626-7705-4D9F-BCBA-DFFBFC5AB7C3}.Release|x86.Build.0 = Release|Win32
+		{1BE5B1F3-8927-4B91-8B30-6FF8E85552DF}.Debug|x64.ActiveCfg = Debug|x64
+		{1BE5B1F3-8927-4B91-8B30-6FF8E85552DF}.Debug|x64.Build.0 = Debug|x64
+		{1BE5B1F3-8927-4B91-8B30-6FF8E85552DF}.Debug|x86.ActiveCfg = Debug|Win32
+		{1BE5B1F3-8927-4B91-8B30-6FF8E85552DF}.Debug|x86.Build.0 = Debug|Win32
+		{1BE5B1F3-8927-4B91-8B30-6FF8E85552DF}.Release|x64.ActiveCfg = Release|x64
+		{1BE5B1F3-8927-4B91-8B30-6FF8E85552DF}.Release|x64.Build.0 = Release|x64
+		{1BE5B1F3-8927-4B91-8B30-6FF8E85552DF}.Release|x86.ActiveCfg = Release|Win32
+		{1BE5B1F3-8927-4B91-8B30-6FF8E85552DF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

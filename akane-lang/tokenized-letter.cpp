@@ -86,10 +86,27 @@ void AkaneLang::TokenizedLetterGenerator::ignoreOne()
 	i++;
 }
 
-AkaneLang::TokenizedLetterGenerator::TokenizedLetterGenerator(const TokenizedLetterGenerator & _another) : tokLetters(_another.tokLetters), i(0)
+AkaneLang::TokenizedLetterGenerator::TokenizedLetterGenerator() : tokLetters(*new std::vector<TokenizedLetter>{}), i(-1), isVectorInternal(true)
 {
 }
 
-AkaneLang::TokenizedLetterGenerator::TokenizedLetterGenerator(std::vector<TokenizedLetter>& _tokLetters) : tokLetters(_tokLetters), i(0)
+AkaneLang::TokenizedLetterGenerator::TokenizedLetterGenerator(const TokenizedLetterGenerator & _another) : tokLetters(_another.tokLetters), i(0), isVectorInternal(false)
 {
+}
+
+TokenizedLetterGenerator & AkaneLang::TokenizedLetterGenerator::operator=(const TokenizedLetterGenerator & _another)
+{
+	tokLetters = _another.tokLetters;
+	i = 0;
+	return *this;
+}
+
+AkaneLang::TokenizedLetterGenerator::TokenizedLetterGenerator(std::vector<TokenizedLetter>& _tokLetters) : tokLetters(_tokLetters), i(0), isVectorInternal(false)
+{
+}
+
+AkaneLang::TokenizedLetterGenerator::~TokenizedLetterGenerator()
+{
+	if (isVectorInternal)
+		delete &tokLetters;
 }

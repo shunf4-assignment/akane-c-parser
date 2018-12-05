@@ -21,7 +21,7 @@ typedef size_t Index;
 
 class AkaneException : public std::exception
 {
-	static const int AkaneExceptionMaxBuf = 100;
+	static const int AkaneExceptionMaxBuf = 1000;
 public:
 	AkaneException(const char *msg_format, ...);
 	AkaneException(const char *msg_format, va_list args);

@@ -240,6 +240,6 @@ AkaneException::AkaneException(const char *msg_format, va_list args)
 {
 	char finalMessage[AkaneExceptionMaxBuf];
 	vsprintf_s(finalMessage, msg_format, args);
-	le(finalMessage);
+	le("%s", finalMessage);
 	this->std::exception::exception(finalMessage);
 }
